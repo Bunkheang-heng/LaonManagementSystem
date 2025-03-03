@@ -1,12 +1,12 @@
 const express = require('express');
 const { db } = require('../firebase-admin');
-const { verifyToken } = require('../middleware/auth');
+const { verifyAdmin, verifyToken } = require('../middleware/auth');
 
 const app = express();
 app.use(express.json());
 
 // Send notification
-app.post('/send', verifyToken, async (req, res) => {
+app.post('/send', verifyAdmin, async (req, res) => {
     try {
         const { userId, message, type } = req.body;
         
@@ -28,37 +28,28 @@ app.post('/send', verifyToken, async (req, res) => {
 // Get user's notifications
 app.get('/my-notifications', verifyToken, async (req, res) => {
     try {
+        // Option A: Remove the ordering in the query
         const notificationsSnapshot = await db.collection('notifications')
             .where('userId', '==', req.user.userId)
-            .orderBy('createdAt', 'desc')
             .get();
 
-        const notifications = notificationsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        // Sort the results in memory instead
+        const notifications = notificationsSnapshot.docs
+            .map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }))
+            .sort((a, b) => {
+                // Convert timestamps to Date objects if needed
+                const dateA = a.createdAt instanceof Date ? a.createdAt : a.createdAt.toDate();
+                const dateB = b.createdAt instanceof Date ? b.createdAt : b.createdAt.toDate();
+                return dateB - dateA; // Descending order
+            });
 
         res.json(notifications);
     } catch (error) {
         console.error('Fetch notifications error:', error);
         res.status(500).json({ error: 'Failed to fetch notifications' });
-    }
-});
-
-// Mark notification as read
-app.put('/:notificationId/read', verifyToken, async (req, res) => {
-    try {
-        const { notificationId } = req.params;
-        
-        await db.collection('notifications').doc(notificationId).update({
-            isRead: true,
-            readAt: new Date()
-        });
-
-        res.json({ message: 'Notification marked as read' });
-    } catch (error) {
-        console.error('Update notification error:', error);
-        res.status(500).json({ error: 'Failed to update notification' });
     }
 });
 

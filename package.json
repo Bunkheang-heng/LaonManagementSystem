@@ -4,12 +4,12 @@
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"npm run start:gateway\" \"npm run start:auth\" \"npm run start:loan\" \"npm run start:admin\" \"npm run start:notifications\" \"npm run start:payments\"",
-    "start:gateway": "node api-gateway/server.js",
-    "start:auth": "node auth-service/server.js",
-    "start:loan": "node loan-service/server.js",
-    "start:admin": "node admin-service/server.js",
-    "start:notifications": "node notification-service/server.js",
-    "start:payments": "node payment-service/server.js"
+    "start:gateway": "nodemon api-gateway/server.js",
+    "start:auth": "nodemon auth-service/server.js",
+    "start:loan": "nodemon loan-service/server.js",
+    "start:admin": "nodemon admin-service/server.js",
+    "start:notifications": "nodemon notification-service/server.js",
+    "start:payments": "nodemon payment-service/server.js"
   },
   "author": "",
   "license": "ISC",

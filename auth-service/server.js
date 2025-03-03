@@ -66,7 +66,7 @@ app.post('/login', async (req, res) => {
                 userId: userDoc.id, 
                 role: userData.role 
             },
-            'your_jwt_secret',
+            process.env.JWT_SECRET || 'your_jwt_secret',
             { expiresIn: '1h' }
         );
 

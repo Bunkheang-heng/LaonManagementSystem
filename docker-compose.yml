@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    volumes:
+      - ./api-gateway:/app/api-gateway
+      - ./shared:/app/shared
+      - ./.env:/app/.env
+    command: node api-gateway/server.js
+    networks:
+      - loan-network
+    depends_on:
+      - auth-service
+      - loan-service
+      - admin-service
+      - notification-service
+      - payment-service
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+    volumes:
+      - ./auth-service:/app/auth-service
+      - ./shared:/app/shared
+      - ./.env:/app/.env
+    command: node auth-service/server.js
+    networks:
+      - loan-network
+
+  loan-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+    volumes:
+      - ./loan-service:/app/loan-service
+      - ./shared:/app/shared
+      - ./.env:/app/.env
+    command: node loan-service/server.js
+    networks:
+      - loan-network
+    depends_on:
+      - auth-service
+
+  admin-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+    volumes:
+      - ./admin-service:/app/admin-service
+      - ./shared:/app/shared
+      - ./.env:/app/.env
+    command: node admin-service/server.js
+    networks:
+      - loan-network
+    depends_on:
+      - auth-service
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+    volumes:
+      - ./notification-service:/app/notification-service
+      - ./shared:/app/shared
+      - ./.env:/app/.env
+    command: node notification-service/server.js
+    networks:
+      - loan-network
+    depends_on:
+      - auth-service
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+    volumes:
+      - ./payment-service:/app/payment-service
+      - ./shared:/app/shared
+      - ./.env:/app/.env
+    command: node payment-service/server.js
+    networks:
+      - loan-network
+    depends_on:
+      - auth-service
+      - loan-service
+
+networks:
+  loan-network:
+    driver: bridge 
